@@ -6,7 +6,7 @@ import pygame.freetype
 
 #SetUp
 pygame.init()
-pygame.display.set_caption('RetroSnake v0.1')
+pygame.display.set_caption('RetroSnake v0.15')
 
 FPS = 60
 FPS_CLOCK =  pygame.time.Clock()
@@ -120,8 +120,13 @@ class Snake():
         self.snakes.append(list(self.lastSnake))
         self.dirList.append(list(self.lastDir))
         self.score += 1
-        self.makeFood()
-
+        if not self.snakeComplete():
+            self.makeFood()
+    
+    #checks if the snake has filled the entire game screen    
+    def snakeComplete(self):
+        return self.score >= 17*17
+        
 #Change to a pause screen game loop        
 def pauseScreen():
     while True:
@@ -142,6 +147,27 @@ def pauseScreen():
             
                    
         GAME_FONT2.render_to(surface, (200, 250), "PAUSED", (0, 0, 0))      
+                
+        pygame.display.update()
+        FPS_CLOCK.tick(FPS)
+        
+#Win screen where player can retry afterwards        
+def win_screen():
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if pygame.Rect((227, 285, 150, 50)).collidepoint(pygame.mouse.get_pos()):
+                    main()
+                
+        if pygame.Rect((192, 285, 150, 50)).collidepoint(pygame.mouse.get_pos()):
+             GAME_FONT.render_to(surface, (207, 300), "Retry?", (200, 200, 200))
+        else:
+             GAME_FONT.render_to(surface, (207, 300), "Retry?", (255, 0, 0))
+                      
+        GAME_FONT2.render_to(surface, (165, 250), "YOU WIN!", (255, 0, 0))      
                 
         pygame.display.update()
         FPS_CLOCK.tick(FPS)
@@ -233,6 +259,7 @@ def main():
                     
                 if event.key == pygame.K_SPACE:
                     pauseScreen()
+                    
             #PAUSE SCREEN BUTTON        
             if event.type == pygame.MOUSEBUTTONUP:
                 if pygame.Rect((580, 350, 150, 50)).collidepoint(pygame.mouse.get_pos()):
@@ -244,7 +271,8 @@ def main():
         pygame.draw.rect(surface, (0,0,0), snake.food)
         if Rect(snake.food).colliderect(Rect(snake.snakes[0])):
             snake.eatFood()
-    
+            if snake.snakeComplete():
+                win_screen()
     
         time2 = pygame.time.get_ticks()
         if time2 > time1 + 150:
@@ -256,7 +284,7 @@ def main():
         pygame.draw.rect(surface, (105, 105, 105), (580, 350, 150, 50))
     
         GAME_FONT.render_to(surface, (590, 50), "Snake", (0, 0, 0))
-        GAME_FONT.render_to(surface, (600, 80), "v0.1", (0, 0, 0))
+        GAME_FONT.render_to(surface, (600, 80), "v0.15", (0, 0, 0))
         GAME_FONT.render_to(surface, (590, 150), "Score", (0, 0, 0))
         if pygame.Rect((580, 350, 150, 50)).collidepoint(pygame.mouse.get_pos()):
              GAME_FONT.render_to(surface, (595, 365), "Pause", (200, 200, 200))
@@ -272,5 +300,4 @@ def main():
         #
         pygame.display.update()
         FPS_CLOCK.tick(FPS)
-
 main()
